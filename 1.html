@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>save money • kalo ada duit tuh di tabung</title>
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="save money">
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
+    
+    <!-- Font & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- CSS Eksternal -->
+    <link rel="stylesheet" href="2.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- PIN Overlay -->
+    <div class="pin-overlay" id="pinOverlay">
+        <div class="pin-card">
+            <div class="pin-title">🔐 Masukkan PIN</div>
+            <div class="pin-subtitle">Untuk mengakses aplikasi</div>
+            <div class="pin-dots" id="pinDots">
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+            </div>
+            <div class="pin-keypad" id="pinKeypad">
+                <div class="pin-key" data-key="1">1</div>
+                <div class="pin-key" data-key="2">2</div>
+                <div class="pin-key" data-key="3">3</div>
+                <div class="pin-key" data-key="4">4</div>
+                <div class="pin-key" data-key="5">5</div>
+                <div class="pin-key" data-key="6">6</div>
+                <div class="pin-key" data-key="7">7</div>
+                <div class="pin-key" data-key="8">8</div>
+                <div class="pin-key" data-key="9">9</div>
+                <div class="pin-key" data-key="clear">C</div>
+                <div class="pin-key" data-key="0">0</div>
+                <div class="pin-key" data-key="backspace">⌫</div>
+            </div>
+            <div class="pin-error" id="pinError"></div>
+            <div class="pin-forgot" id="forgotPin">Lupa PIN? (reset)</div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <div class="header">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fas fa-piggy-bank"></i></div>
+                <div class="app-title">save<span>money</span></div>
+            </div>
+            <div class="settings-btn" id="settingsBtn">
+                <i class="fas fa-cog"></i>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div class="settings-modal" id="settingsModal">
+            <div class="settings-card">
+                <div class="settings-header">
+                    <h2 id="settingsTitle">Pengaturan</h2>
+                    <div class="settings-close" id="settingsClose">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <div class="settings-section-title" id="appSectionTitle">APLIKASI</div>
+                    
+                    <div class="settings-item" id="tampilanItem">
+                        <i class="fas fa-sun"></i>
+                        <span id="tampilanText">Tampilan</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    
+                    <div class="settings-submenu" id="tampilanSubmenu">
+                        <div class="submenu-item" data-theme="dark">
+                            <i class="fas fa-moon"></i>
+                            <span id="darkText">Gelap</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                        <div class="submenu-item" data-theme="light">
+                            <i class="fas fa-sun"></i>
+                            <span id="lightText">Siang</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                        <div class="submenu-item" data-theme="auto">
+                            <i class="fas fa-clock"></i>
+                            <span id="autoText">Auto Darkmode</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-submenu" id="autoDarkmodeSubmenu" style="margin-left: 3rem;">
+                        <div class="submenu-item" data-auto="dark">
+                            <i class="fas fa-moon"></i>
+                            <span id="autoDarkText">Gelap (22:00 - 05:00)</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                        <div class="submenu-item" data-auto="custom">
+                            <i class="fas fa-pen"></i>
+                            <span id="autoCustomText">Kustom</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="custom-time-panel" id="customTimePanel" style="display: none;">
+                        <div class="time-setting">
+                            <label for="darkStartTime">Mulai Gelap</label>
+                            <input type="time" id="darkStartTime" value="22:00">
+                        </div>
+                        <div class="time-setting">
+                            <label for="darkEndTime">Selesai Gelap</label>
+                            <input type="time" id="darkEndTime" value="05:00">
+                        </div>
+                        <button class="btn-save-time" id="saveCustomTimeBtn">
+                            <i class="fas fa-save"></i> Simpan
+                        </button>
+                    </div>
+                    
+                    <div class="settings-item" id="kustomItem">
+                        <i class="fas fa-palette"></i>
+                        <span id="kustomText">Custom Tampilan</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    
+                    <div class="settings-submenu" id="kustomSubmenu">
+                        <div class="submenu-item" data-custom="default">
+                            <i class="fas fa-paint-brush"></i>
+                            <span id="defaultText">Bawaan</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                        <div class="submenu-item" data-custom="ocean">
+                            <i class="fas fa-water"></i>
+                            <span id="oceanText">Ocean</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                        <div class="submenu-item" data-custom="forest">
+                            <i class="fas fa-tree"></i>
+                            <span id="forestText">Forest</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                        <div class="submenu-item" data-custom="sunset">
+                            <i class="fas fa-sun"></i>
+                            <span id="sunsetText">Sunset</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                        <div class="submenu-item" data-custom="space">
+                            <i class="fas fa-rocket"></i>
+                            <span id="spaceText">Ruang Angkasa</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-item" id="bahasaItem">
+                        <i class="fas fa-globe"></i>
+                        <span id="bahasaText">Bahasa</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    
+                    <div class="settings-submenu" id="bahasaSubmenu">
+                        <div class="submenu-item active" data-lang="id">
+                            <i class="fas fa-flag"></i>
+                            <span>Indonesia</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                        <div class="submenu-item" data-lang="en">
+                            <i class="fas fa-flag-usa"></i>
+                            <span>English</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                    </div>
+
+                    <!-- Keamanan & Privasi -->
+                    <div class="settings-item" id="keamananItem">
+                        <i class="fas fa-lock"></i>
+                        <span id="keamananText">Keamanan & Privasi</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    
+                    <div class="settings-submenu" id="keamananSubmenu">
+                        <div class="submenu-item" id="enablePin">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="enablePinText">Aktifkan PIN</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                        <div class="submenu-item" id="changePin">
+                            <i class="fas fa-key"></i>
+                            <span id="changePinText">Ubah PIN</span>
+                        </div>
+                        <div class="submenu-item" id="disablePin">
+                            <i class="fas fa-times-circle"></i>
+                            <span id="disablePinText">Nonaktifkan PIN</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="backup-section">
+                    <div class="backup-title" id="backupTitle">Backup & Restore</div>
+                    <div class="backup-buttons">
+                        <button class="backup-btn" id="backupBtn">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span id="backupText">Backup</span>
+                        </button>
+                        <label for="restoreFile" class="backup-btn" id="restoreLabel">
+                            <i class="fas fa-cloud-download-alt"></i>
+                            <span id="restoreText">Restore</span>
+                        </label>
+                    </div>
+                    <input type="file" id="restoreFile" class="restore-input" accept=".json">
+                </div>
+            </div>
+        </div>
+
+        <!-- EDIT MODAL DENGAN TOMBOL HAPUS -->
+        <div class="edit-modal" id="editModal">
+            <div class="edit-modal-content">
+                <div class="edit-modal-header">
+                    <h3>Edit Transaksi</h3>
+                    <button class="edit-modal-close" onclick="closeEditModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="edit-modal-body">
+                    <div class="edit-date-info">
+                        <span class="edit-day" id="editDay">Senin</span>
+                        <span class="edit-full-date" id="editFullDate">16 Februari 2026 • 14:30</span>
+                    </div>
+                    
+                    <div class="edit-type-badge" id="editTypeBadge">
+                        <i class="fas fa-arrow-up" id="editTypeIcon"></i>
+                        <span id="editTypeText">Pemasukan</span>
+                    </div>
+                    
+                    <div class="edit-field">
+                        <label for="editDesc">Deskripsi</label>
+                        <input type="text" id="editDesc" placeholder="Nama transaksi">
+                    </div>
+                    
+                    <div class="edit-field">
+                        <label for="editAmount">Jumlah (Rp)</label>
+                        <input type="number" id="editAmount" placeholder="0" min="0">
+                    </div>
+                    
+                    <div class="edit-field">
+                        <label for="editDate">Tanggal</label>
+                        <input type="date" id="editDate">
+                    </div>
+                    
+                    <div class="edit-field">
+                        <label for="editTime">Waktu</label>
+                        <input type="time" id="editTime">
+                    </div>
+                    
+                    <div class="edit-field">
+                        <label for="editCategory">Kategori</label>
+                        <select id="editCategory">
+                            <option value="income">Pemasukan</option>
+                            <option value="expense">Pengeluaran</option>
+                        </select>
+                    </div>
+                    
+                    <div class="edit-notes">
+                        <label for="editNotes">Catatan (opsional)</label>
+                        <textarea id="editNotes" placeholder="Tambahkan catatan..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="edit-modal-footer">
+                    <button class="edit-btn-delete" onclick="deleteFromEditModal()">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                    <button class="edit-btn-cancel" onclick="closeEditModal()">Batal</button>
+                    <button class="edit-btn-save" onclick="saveEditData()">Simpan</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="interactive-card">
+            <div class="profile-wrapper">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar">
+                        <div class="default-avatar" id="defaultAvatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <img src="" alt="Profile" id="profileImage" style="display: none;">
+                    </div>
+                    
+                    <div class="profile-add-photo" id="addPhotoBtn">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    
+                    <input type="file" id="photoUpload" accept="image/*">
+                    
+                    <div class="profile-name-info">
+                        <h2 id="profileName">isya arrazy</h2>
+                        <p><i class="far fa-calendar-alt"></i> Member 2026</p>
+                    </div>
+                </div>
+                
+                <div class="challenge-card">
+                    <div class="challenge-title">
+                        <i class="fas fa-fire"></i>
+                        <span id="challengeName">#30HariHemat</span>
+                    </div>
+                    <div class="challenge-row">
+                        <span id="challengeDay">Hari ke-7/30</span>
+                        <span id="challengeCollected">Terkumpul: Rp 5.676.667.498</span>
+                    </div>
+                    <div class="challenge-row">
+                        <span id="challengeTarget">Target: Rp 10.000.000.000</span>
+                    </div>
+                    <div class="challenge-bar">
+                        <div class="challenge-fill" id="challengeFill" style="width: 56%"></div>
+                    </div>
+                    <div class="challenge-stats">
+                        <span id="challengePercent">56%</span>
+                        <span id="challengeRemaining">Sisa Rp 4.323.332.502</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-arrow-down" style="color: var(--income);"></i> <span id="incomeLabel">Pemasukan</span></div>
+                <div class="stat-number income-number" id="totalIncomeDisplay">Rp 38.851.667</div>
+                <div class="stat-sub" id="incomeSub">total pemasukan</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-arrow-up" style="color: var(--expense);"></i> <span id="expenseLabel">Pengeluaran</span></div>
+                <div class="stat-number expense-number" id="totalExpenseDisplay">Rp 56.000</div>
+                <div class="stat-sub" id="expenseSub">total pengeluaran</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-piggy-bank" style="color: var(--saving);"></i> <span id="savingLabel">Sisa Uang Anda</span></div>
+                <div class="stat-number saving-number" id="totalSavingsDisplay">Rp 116.555</div>
+                <div class="stat-sub" id="savingSub">saldo tersedia</div>
+            </div>
+        </div>
+
+        <div class="dashboard-two-col">
+            <div>
+                <div class="section-header">
+                    <h3 id="ringkasanTitle">
+                        <i class="fas fa-chart-bar" id="ringkasanIcon" style="color: var(--accent);"></i>
+                        <span id="ringkasanText">Ringkasan</span>
+                    </h3>
+                </div>
+                
+                <div class="periodic-container">
+                    <div class="periodic-header">
+                        <div class="periodic-tabs">
+                            <button class="periodic-tab" data-period="day">Hari</button>
+                            <button class="periodic-tab" data-period="week">Minggu</button>
+                            <button class="periodic-tab active" data-period="month">Bulan</button>
+                            <button class="periodic-tab" data-period="year">Tahun</button>
+                        </div>
+                    </div>
+                    
+                    <div class="periodic-date-selector">
+                        <button class="periodic-prev" id="periodicPrev"><i class="fas fa-chevron-left"></i></button>
+                        <span class="periodic-range" id="periodicDateRange">Februari 2026</span>
+                        <button class="periodic-next" id="periodicNext"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    
+                    <!-- PERIODIC STATS - FORMAT BARU 2 BARIS -->
+                    <div class="periodic-stats">
+                        <!-- Baris 1: RATA-RATA dan TRANSAKSI -->
+                        <div class="periodic-stat">
+                            <div class="periodic-stat-label">RATA-RATA</div>
+                            <div class="periodic-stat-value" id="periodicAvg">Rp 130.000</div>
+                        </div>
+                        <div class="periodic-stat">
+                            <div class="periodic-stat-label">TRANSAKSI</div>
+                            <div class="periodic-stat-value" id="periodicCount">5 transaksi</div>
+                        </div>
+                        
+                        <!-- Baris 2: TERBESAR dan TOTAL -->
+                        <div class="periodic-stat">
+                            <div class="periodic-stat-label">TERBESAR</div>
+                            <div class="periodic-stat-value" id="periodicLargest">Rp 80.000.000</div>
+                        </div>
+                        
+                        <div class="periodic-stat total-stat">
+                            <div class="periodic-stat-label">TOTAL</div>
+                            <div class="periodic-stat-value" id="periodicTotal">Rp 81.650.000</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="donutChartContainer" class="chart-container" style="display: none;">
+                    <canvas id="financeChart"></canvas>
+                </div>
+                
+                <div id="progressBarContainer" class="progress-container" style="display: block;">
+                    <div class="chart-row">
+                        <div class="chart-bars">
+                            <div class="bar-box" data-type="income">
+                                <div class="bar green" id="incomeBar" style="height: 100%"></div>
+                            </div>
+                            <div class="bar-box" data-type="expense">
+                                <div class="bar red" id="expenseBar" style="height: 1%"></div>
+                            </div>
+                            <div class="bar-box" data-type="balance">
+                                <div class="bar orange" id="balanceBar" style="height: 99%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- INFO ITEMS TANPA ICON -->
+                        <div class="chart-info">
+                            <div class="info-item income-info" id="incomeInfo">
+                                <div class="info-left">
+                                    <div class="info-label"><span id="pemasukanLabel">PEMASUKAN</span></div>
+                                    <div class="info-amount income-amount" id="incomeAmount">Rp 116.555</div>
+                                </div>
+                                <div class="info-right">
+                                    <div class="info-percentage positive" id="incomePercentage">
+                                        <i class="fas fa-arrow-up"></i> 13.6%
+                                    </div>
+                                </div>
+                                <div class="info-progress" id="incomeProgress" style="width: 100%"></div>
+                            </div>
+                            
+                            <div class="info-item expense-info" id="expenseInfo">
+                                <div class="info-left">
+                                    <div class="info-label"><span id="pengeluaranLabel">PENGELUARAN</span></div>
+                                    <div class="info-amount expense-amount" id="expenseAmount">Rp 0</div>
+                                </div>
+                                <div class="info-right">
+                                    <div class="info-percentage positive" id="expensePercentage">
+                                        <i class="fas fa-arrow-up"></i> 100%
+                                    </div>
+                                </div>
+                                <div class="info-progress" id="expenseProgress" style="width: 0%"></div>
+                            </div>
+                            
+                            <div class="info-item balance-info" id="balanceInfo">
+                                <div class="info-left">
+                                    <div class="info-label"><span id="sisaUangLabel">SISA UANG</span></div>
+                                    <div class="info-amount balance-amount" id="balanceAmount">Rp 116.555</div>
+                                </div>
+                                <div class="info-right">
+                                    <div class="info-percentage positive" id="balancePercentage">
+                                        <i class="fas fa-arrow-up"></i> 17.6%
+                                    </div>
+                                </div>
+                                <div class="info-progress" id="balanceProgress" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <span class="legend-color income"></span>
+                        <span id="legendPemasukan">Pemasukan</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color expense"></span>
+                        <span id="legendPengeluaran">Pengeluaran</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color saving"></span>
+                        <span id="legendSisa">Sisa Uang</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <div class="section-header">
+                    <h3><i class="fas fa-clock"></i> <span id="transaksiText">Transaksi</span></h3>
+                    <span class="badge" id="transactionCount">2 item</span>
+                </div>
+
+                <!-- Search Box -->
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Cari transaksi..." autocomplete="off">
+                        <span class="search-clear" id="searchClear" style="display: none;">✕</span>
+                    </div>
+                </div>
+                
+                <ul class="transaction-list" id="transactionList"></ul>
+            </div>
+        </div>
+
+        <div class="action-grid">
+            <div class="glass-panel">
+                <div class="section-header">
+                    <h3><i class="fas fa-circle-plus" style="color: var(--income);"></i> <span id="tambahPemasukanText">Tambah Pemasukan</span></h3>
+                </div>
+                <div class="input-group">
+                    <label id="descLabel">Deskripsi</label>
+                    <input type="text" class="field-input" id="incomeDesc" placeholder="Gaji, freelance, dll">
+                    <div class="error-message" id="incomeDescError"></div>
+                </div>
+                <div class="input-group">
+                    <label id="amountLabel">Jumlah (Rp)</label>
+                    <input type="number" class="field-input" id="incomeAmountInput" placeholder="0" min="0">
+                    <div class="error-message" id="incomeAmountError"></div>
+                </div>
+                <button class="btn btn-income" id="addIncomeBtn"><i class="fas fa-plus-circle"></i> <span id="tambahPemasukanBtn">Tambah Pemasukan</span></button>
+            </div>
+            <div class="glass-panel">
+                <div class="section-header">
+                    <h3><i class="fas fa-circle-minus" style="color: var(--expense);"></i> <span id="tambahPengeluaranText">Tambah Pengeluaran</span></h3>
+                </div>
+                <div class="input-group">
+                    <label id="descLabel2">Deskripsi</label>
+                    <input type="text" class="field-input" id="expenseDesc" placeholder="Belanja, tagihan, etc">
+                    <div class="error-message" id="expenseDescError"></div>
+                </div>
+                <div class="input-group">
+                    <label id="amountLabel2">Jumlah (Rp)</label>
+                    <input type="number" class="field-input" id="expenseAmountInput" placeholder="0" min="0">
+                    <div class="error-message" id="expenseAmountError"></div>
+                </div>
+                <button class="btn btn-expense" id="addExpenseBtn"><i class="fas fa-minus-circle"></i> <span id="tambahPengeluaranBtn">Tambah Pengeluaran</span></button>
+            </div>
+        </div>
+
+        <div class="reset-container">
+            <button class="btn-outline delete-btn-small" id="resetDataBtn"><i class="fas fa-rotate-left"></i> <span id="resetText">Reset Semua</span></button>
+        </div>
+    </div>
+
+    <div id="toast" role="alert" aria-live="polite"></div>
+
+    <!-- JavaScript Eksternal -->
+    <script src="script.js"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js').then(function(registration) {
+                    console.log('ServiceWorker registered');
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
